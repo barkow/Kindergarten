@@ -1,0 +1,10 @@
+<h2>Familien</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr><th>Name</th></tr>
+    </thead>
+    <tbody data-bind="foreach: families">
+        <tr><td><a data-bind="text: name, attr: {href: '#familydetails/'+id}"></a></td></tr>
+    </tbody>
+</table>

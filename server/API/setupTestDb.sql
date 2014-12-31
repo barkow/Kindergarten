@@ -7,24 +7,14 @@ DROP TABLE kontaktpersonen;
 CREATE table kontaktpersonen(	id INTEGER PRIMARY KEY AUTOINCREMENT, 
 				name TEXT, 
 				vorname TEXT, 
-				email TEXT, 
+				email TEXT,
+				istStandardEmailKontakt INTEGER,
 				mobilNr TEXT, 
 				festnetzNr TEXT, 
+				sonstNr TEXT,
 				kommentar TEXT, 
 				familienId INTEGER,
 				FOREIGN KEY (familienId) REFERENCES familien(id));
-
-DROP table kontaktdaten;
-CREATE table kontaktdaten(	id INTEGER PRIMARY KEY AUTOINCREMENT,
-				daten TEXT,
-				kontaktdatentypenId INTEGER,
-				kontaktpersonenId INTEGER,
-				FOREIGN KEY (kontaktdatentypenId) REFERENCES kontaktdatentypen(id),
-				FOREIGN KEY (kontaktpersonenId) REFERENCES kontaktpersonen(id));
-
-DROP table kontaktdatentypen;
-CREATE table kontaktdatentypen(	id INTEGER PRIMARY KEY AUTOINCREMENT,
-				bezeichnung TEXT);
 
 DROP table kinder;
 CREATE table kinder(		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,37 +23,45 @@ CREATE table kinder(		id INTEGER PRIMARY KEY AUTOINCREMENT,
 				familienId INTEGER,
 				FOREIGN KEY (familienId) REFERENCES familien(id));
 
-INSERT INTO kontaktdatentypen(id, bezeichnung) VALUES
-	(1, 'E-Mail'),(2, 'Festnetz'),(3, 'Handy');
+DROP table schlagwoerter;
+CREATE table schlagwoerter(	id INTEGER PRIMARY KEY AUTOINCREMENT,
+				bezeichnung TEXT UNIQUE,
+				kommentar TEXT);
+				
+DROP table kinderschlagwoerter;
+CREATE table kinderschlagwoerter(	id INTEGER PRIMARY KEY AUTOINCREMENT,
+				kinderId INTEGER,
+				schlagwoerterId INTEGER,
+				FOREIGN KEY (kinderId) REFERENCES kinder(id),
+				FOREIGN KEY (schlagwoerterId) REFERENCES schlagwoerter(id));
+
+INSERT INTO schlagwoerter(id, bezeichnung) VALUES
+	(1, 'Waldkind'),
+	(2, 'Turngruppe 1'),
+	(3, 'Turngruppe 2');
 
 INSERT INTO familien(id, name) VALUES 
-	(1,'auerbach');
+	(1,'Auerbach');
 INSERT INTO kontaktpersonen(id, name, vorname, kommentar, familienId) VALUES 
-	(1, 'auerbach', 'arndt', 'Vater', 1),
-	(2, 'auerbach', 'amalie', 'Mutter', 1);
-INSERT INTO kontaktdaten(daten, kontaktdatentypenId, kontaktpersonenId) VALUES
-	('arndt@auerbach.de', 1, 1),
-	('0177-123456', 2, 1),
-	('02233-543221', 3, 1),
-	('amalie@auerbach.de', 1, 2),
-	('0177-amalie', 2, 2),
-	('02233-amalie', 3, 2);
+	(1, 'Auerbach', 'Arndt', 'Vater', 1),
+	(2, 'Auerbach', 'Amalie', 'Mutter', 1);
 INSERT INTO kinder(id, name, vorname, familienId) VALUES 
-	(1, 'auerbach', 'arno junior', 1),
-	(2, 'auerbach', 'amy', 1);
+	(1, 'Auerbach', 'Arno junior', 1),
+	(2, 'Auerbach', 'Amy', 1);
+INSERT INTO kinderschlagwoerter(kinderId, schlagwoerterId) VALUES
+	(1,1),
+	(1,2),
+	(2,1),
+	(2,3);
 
 INSERT INTO familien(id, name) VALUES 
-	(2,'becker');
+	(2,'Becker');
 INSERT INTO kontaktpersonen(id, name, vorname, kommentar, familienId) VALUES 
-	(3, 'becker', 'bert', 'Vater', 2),
-	(4, 'becker', 'brunhilde', 'Mutter', 2);
-INSERT INTO kontaktdaten(daten, kontaktdatentypenId, kontaktpersonenId) VALUES
-	('bert@becker.de', 1, 3),
-	('0177-bert', 2, 3),
-	('02233-bert', 3, 3),
-	('bruni@becker.de', 1, 4),
-	('0177-bruni', 2, 4),
-	('02233-bruni', 3, 4);
+	(3, 'Becker', 'Bert', 'Vater', 2),
+	(4, 'Becker', 'Brunhilde', 'Mutter', 2);
 INSERT INTO kinder(id, name, vorname, familienId) VALUES 
-	(3, 'becker', 'boris junior', 2),
-	(4, 'becker', 'beate', 2);
+	(3, 'Becker', 'Boris junior', 2),
+	(4, 'Becker', 'Beate', 2);
+INSERT INTO kinderschlagwoerter(kinderId, schlagwoerterId) VALUES
+	(3,1),
+	(3,2);

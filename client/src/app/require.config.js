@@ -6,12 +6,16 @@ var require = {
         "crossroads":           "bower_modules/crossroads/dist/crossroads.min",
         "hasher":               "bower_modules/hasher/dist/js/hasher.min",
         "jquery":               "bower_modules/jquery/dist/jquery",
+        "jquery-validation":    "bower_modules/jquery-validation/dist/jquery.validate.min",
         "knockout":             "bower_modules/knockout/dist/knockout",
         "knockout-projections": "bower_modules/knockout-projections/dist/knockout-projections",
         "signals":              "bower_modules/js-signals/dist/signals.min",
-        "text":                 "bower_modules/requirejs-text/text"
+        "text":                 "bower_modules/requirejs-text/text",
+        "select2":              "bower_modules/select2/select2.min"
     },
     shim: {
-        "bootstrap": { deps: ["jquery"] }
+        "bootstrap":            { deps: ["jquery"] },
+        "jquery-validation":    { deps: ["jquery"] },
+        "select2":              { deps: ["jquery"] }
     }
 };

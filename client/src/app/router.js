@@ -12,13 +12,18 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
     return new Router({
         routes: [
             { url: '',                  params: { page: 'home-page' } },
-            { url: 'familyDetails',     params: { page: 'familyDetails-page' } },
+            { url: 'familydetails/:familyId:',                  params: { page: 'family-details-page' } },
+            { url: 'familydetails/:familyId:/childdetails/:childId:',                  params: { page: 'child-details-page' } },
+            { url: 'familydetails/:familyId:/contactdetails/:contactId:',                  params: { page: 'contact-details-page' } },
+            { url: 'families',                  params: { page: 'families-page' } },
+            { url: 'taglist',                  params: { page: 'taglist-page' } },
             { url: 'about',             params: { page: 'about-page' } }
         ]
     });
 
     function Router(config) {
         var currentRoute = this.currentRoute = ko.observable({});
+        var oldRoute = this.oldRoute = null;
 
         ko.utils.arrayForEach(config.routes, function(route) {
             crossroads.addRoute(route.url, function(requestParams) {
@@ -27,6 +32,11 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
         });
 
         activateCrossroads();
+        
+        function storeOldRoute(newHash, oldHash){
+          this.oldRoute = oldHash;
+        };
+        hasher.changed.add(storeOldRoute);
     }
 
     function activateCrossroads() {

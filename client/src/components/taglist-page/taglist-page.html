@@ -1,0 +1,19 @@
+<h2>Schlagwortliste</h2>
+
+<form>
+    <div class="form-group">
+        <label for="selectChildTags">Schlagwörter</label>
+        <select class="form-control" id="selectChildTags" data-bind="options: availableTags, optionsText: 'bezeichnung', optionsValue: 'id', value: selectedTag, select2: {}"></select>
+    </div>
+</form>
+<a data-bind="attr: {href: 'mailto:'+mailCollector()}">Mail an alle Mailkontakte schicken</a>
+<div>
+    <table class="table table-striped">
+        <thead>
+            <tr><th>Vorname</th><th>Name</th></tr>
+        </thead>
+        <tbody data-bind="foreach: children">
+            <tr><td><a data-bind="text: vorname"></a></td><td data-bind="text: name"></td></tr>
+        </tbody>
+    </table>
+</div>
