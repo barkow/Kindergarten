@@ -11,7 +11,8 @@ var require = {
         "knockout-projections": "bower_modules/knockout-projections/dist/knockout-projections",
         "signals":              "bower_modules/js-signals/dist/signals.min",
         "text":                 "bower_modules/requirejs-text/text",
-        "select2":              "bower_modules/select2/select2.min"
+        "select2":              "bower_modules/select2/select2.min",
+        "select2-ko-binding":   "app/select2-ko-binding"
     },
     shim: {
         "bootstrap":            { deps: ["jquery"] },

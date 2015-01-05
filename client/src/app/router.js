@@ -11,19 +11,20 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 
     return new Router({
         routes: [
-            { url: '',                  params: { page: 'home-page' } },
-            { url: 'familydetails/:familyId:',                  params: { page: 'family-details-page' } },
-            { url: 'familydetails/:familyId:/childdetails/:childId:',                  params: { page: 'child-details-page' } },
-            { url: 'familydetails/:familyId:/contactdetails/:contactId:',                  params: { page: 'contact-details-page' } },
-            { url: 'families',                  params: { page: 'families-page' } },
-            { url: 'taglist',                  params: { page: 'taglist-page' } },
-            { url: 'about',             params: { page: 'about-page' } }
+            { url: '',                                                      params: { page: 'home-page' } },
+            { url: 'familydetails/:familyId:',                              params: { page: 'family-details-page' } },
+            { url: 'familydetails/:familyId:/childdetails/:childId:',       params: { page: 'child-details-page' } },
+            { url: 'familydetails/:familyId:/contactdetails/:contactId:',   params: { page: 'contact-details-page' } },
+            { url: 'families',                                              params: { page: 'families-page' } },
+            { url: 'taglist',                                               params: { page: 'taglist-page' } },
+            { url: 'login',                                                 params: { page: 'login-page' } },
+            { url: 'about',                                                 params: { page: 'about-page' } }
         ]
     });
 
     function Router(config) {
         var currentRoute = this.currentRoute = ko.observable({});
-        var oldRoute = this.oldRoute = null;
+        var oldRoute = this.oldRoute = ko.observable();
 
         ko.utils.arrayForEach(config.routes, function(route) {
             crossroads.addRoute(route.url, function(requestParams) {
@@ -31,7 +32,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
             });
         });
 
-        activateCrossroads();
+        activateCrossroads(this.oldRoute);
         
         function storeOldRoute(newHash, oldHash){
           this.oldRoute = oldHash;
@@ -39,8 +40,8 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
         hasher.changed.add(storeOldRoute);
     }
 
-    function activateCrossroads() {
-        function parseHash(newHash, oldHash) { crossroads.parse(newHash); }
+    function activateCrossroads(oldRoute) {
+        function parseHash(newHash, oldHash) { oldRoute(oldHash); crossroads.parse(newHash); }
         crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
         hasher.initialized.add(parseHash);
         hasher.changed.add(parseHash);

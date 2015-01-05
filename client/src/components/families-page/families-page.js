@@ -1,4 +1,4 @@
-define(['knockout', 'text!./families-page.html'], function(ko, templateMarkup) {
+define(['knockout', 'text!./families-page.html', 'hasher'], function(ko, templateMarkup, hasher) {
 
   function FamiliesPage(params) {
     var self = this;
@@ -11,10 +11,14 @@ define(['knockout', 'text!./families-page.html'], function(ko, templateMarkup) {
         $.each(data, function(index, value){
           self.families.push(value);
         });
+		  }).error(function(data){
+		    console.log(data); 
+		    hasher.setHash('login');
 		  });
     };
     
     self.getFamilies();
+    console.log(params);
   }
 
   // This runs when the component is torn down. Put here any logic necessary to clean up,

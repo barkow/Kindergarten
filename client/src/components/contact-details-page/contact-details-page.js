@@ -1,10 +1,10 @@
-define(['knockout', 'jquery', 'text!./contact-details-page.html', 'jquery-validation'], function(ko, $, templateMarkup) {
+define(['knockout', 'jquery', 'text!./contact-details-page.html', 'hasher', 'jquery-validation'], function(ko, $, templateMarkup, hasher) {
 
   function ContactsPage(params) {
     var self = this;
     
-    self.id = params.contactId;
-    self.familyId = params.familyId;
+    self.id = params.route.contactId;
+    self.familyId = params.route.familyId;
     self.editMode = ko.observable(true);
     self.surname = ko.observable("");
     self.givenname = ko.observable("");
@@ -30,7 +30,9 @@ define(['knockout', 'jquery', 'text!./contact-details-page.html', 'jquery-valida
 	  };
 	  
 	  self.closeClick = function(){
-	    history.back();
+	    if(params.oldroute){
+	      hasher.setHash(params.oldroute);
+	    }
 	  };
 	  
 	  self.saveClick = function(){

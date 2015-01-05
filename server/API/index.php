@@ -3,9 +3,45 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 require 'Slim/Slim.php';
+\Slim\Slim::registerAutoloader();
 
 class DbObject {
 	public $id;
+	
+	//Prüft, ob die als Array übergebenen Eigenschaftsbezeichnungen auch Eigenschaften des Objekts sind
+	public function hasRequiredProperties($obj){
+		foreach($this->requiredDataFields as $prop){
+			if (!property_exists($obj, $prop)){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public function setRequiredProperties($obj){
+		foreach($this->requiredDataFields as $field){
+			$this->$field = $obj->$field;
+		}
+	}
+	
+	//Prüft, ob alle Eigenschaften des Objekts $obj auch Eigenschaften von uns selbst sind
+	public function hasValidProperties($obj){
+		foreach(((array)$obj) as $prop => $val)
+		{
+			if (!property_exists($this, $prop)){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	//Setzt alle in $obj enthakltenen Eigenschaften im lokalen Objekt
+	public function setProperties($obj){
+		foreach(((array)$obj) as $prop => $val)
+		{
+			$this->$prop = $obj->$prop;
+		}
+	}
 }
 
 class Familie extends DbObject {
@@ -14,7 +50,10 @@ class Familie extends DbObject {
 	public $kinder = array();
 	public $kontaktpersonen = array();
 	
-	public function initFromDb($db, $id, $extend = array(), $fields = array()){
+	//Beschreibt die Datenfelder, die beim Anlegen einer neuen Familie angegeben sein müssen
+	protected $requiredDataFields = array("name");
+	
+	public function read($db, $id, $extend = array(), $fields = array()){
 		$stmt = $db->prepare('SELECT * FROM familien WHERE id=:id;');
 		$stmt->bindValue(':id', $id);
 		$result = $stmt->execute();
@@ -57,33 +96,55 @@ class Familie extends DbObject {
 		}
 
 	}
-}
 
-class Kontaktdaten {
-	public $id;
-	public $typ;
-	public $daten;
-
-	public function initFromDb($db, $id, $extend = array(), $fields = array()){
-		$stmt = $db->prepare('SELECT * FROM kontaktdaten JOIN kontaktdatentypen ON kontaktdaten.kontaktdatentypenId = kontaktdatentypen.id WHERE kontaktdaten.id=:id;');
-		$stmt->bindValue(':id', $id);
+	public function create($db){
+		$stmt = $db->prepare('INSERT INTO familien(name) VALUES(:name); SELECT last_insert_rowid() FROM familien;');
+		$stmt->bindValue(':name', $this->name);
 		$result = $stmt->execute();
-		if($row = $result->fetchArray()){
-			$this->typ = $row['bezeichnung'];
-			$this->daten = $row['daten'];
-			//TODO: Methode des Vaters aufrufen statt id selbst zu setzern
-			$this->id = $row['id'];
+		if(!$result){
+			return false;
+		}
+		$this->id = $db->lastInsertRowID();
+		
+		return true;
+	}
+	
+	public function update($db){
+		$stmt = $db->prepare('UPDATE familien SET name=:name WHERE id=:id;');
+		$stmt->bindValue(':id', $this->id);
+		$stmt->bindValue(':name', $this->name);
+		$result = $stmt->execute();
+		if(!$result){
+			return false;
+		}
+		else{
+			return true;
+		}
+	}
+	
+	public function delete($db){
+		$stmt = $db->prepare('DELETE FROM familien WHERE id=:id;');
+		$stmt->bindValue(':id', $this->id);
+		$result = $stmt->execute();
+		if(!$result){
+			return false;
+		}
+		else{
+			return true;
 		}
 	}
 }
 
-class Kind {
+class Kind extends DbObject {
 	public $id;
 	public $name;
 	public $vorname;
-	public $gruppe;
+	public $geburtsdatum;
 	public $schlagwoerter = array();
 	public $emailkontakte = array();
+	
+	//Beschreibt die Datenfelder, die beim Anlegen einer neuen Kinds angegeben sein müssen
+	protected $requiredDataFields = array("name", "vorname", "schlagwoerter", "geburtsdatum");
 
 	public function initFromDb($db, $id, $extend = array(), $fields = array()){
 		$stmt = $db->prepare('SELECT * FROM kinder WHERE id=:id;');
@@ -92,6 +153,7 @@ class Kind {
 		if($row = $result->fetchArray()){
 			$this->name = $row['name'];
 			$this->vorname = $row['vorname'];
+			$this->geburtsdatum = $row['geburtsdatum'];
 			//TODO: Methode des Vaters aufrufen statt id selbst zu setzern
 			$this->id = $row['id'];
 		}
@@ -117,10 +179,11 @@ class Kind {
 	}
 	
 	public function create($db, $familienId){
-		$stmt = $db->prepare('INSERT INTO kinder(name, vorname, familienId) VALUES(:name, :vorname, :familienId); SELECT last_insert_rowid() FROM kinder;');
+		$stmt = $db->prepare('INSERT INTO kinder(name, vorname, geburtsdatum, familienId) VALUES(:name, :vorname, :geburtsdatum, :familienId); SELECT last_insert_rowid() FROM kinder;');
 		$stmt->bindValue(':familienId', $familienId);
 		$stmt->bindValue(':name', $this->name);
 		$stmt->bindValue(':vorname', $this->vorname);
+		$stmt->bindValue(':geburtsdatum', $this->geburtsdatum);
 		$result = $stmt->execute();
 		if(!$result){
 			return false;
@@ -135,14 +198,15 @@ class Kind {
 			$stmt->execute();
 		}
 		
-		return $this->id;
+		return true;
 	}
 	
 	public function update($db){
-		$stmt = $db->prepare('UPDATE kinder SET name=:name, vorname=:vorname WHERE id=:id;');
+		$stmt = $db->prepare('UPDATE kinder SET name=:name, vorname=:vorname, geburtsdatum=:geburtsdatum WHERE id=:id;');
 		$stmt->bindValue(':id', $this->id);
 		$stmt->bindValue(':name', $this->name);
 		$stmt->bindValue(':vorname', $this->vorname);
+		$stmt->bindValue(':geburtsdatum', $this->geburtsdatum);
 		$result = $stmt->execute();
 		if(!$result){
 			return false;
@@ -165,7 +229,7 @@ class Kind {
 	}
 }
 
-class Schlagwort {
+class Schlagwort extends DbObject {
 	public $id;
 	public $bezeichnung;
 	public $kommentar;
@@ -182,12 +246,7 @@ class Schlagwort {
 	}
 }
 
-class Gruppe {
-	public $id;
-	public $name;
-}
-
-class Kontaktperson {
+class Kontaktperson extends DbObject {
 	public $id;
 	public $name;
 	public $vorname;
@@ -198,6 +257,9 @@ class Kontaktperson {
 	public $festnetzNr;
 	public $sonstNr;
 	public $familienId;
+	
+	//Beschreibt die Datenfelder, die beim Anlegen einer neuen Kontaktperson angegeben sein müssen
+	protected $requiredDataFields= array("name", "vorname", "kommentar", "email", "istStandardEmailKontakt", "mobilNr", "festnetzNr", "sonstNr");
 
 	public function read($db, $id, $extend = array(), $fields = array()){
 		$stmt = $db->prepare('SELECT * FROM kontaktpersonen WHERE id=:id;');
@@ -276,22 +338,61 @@ class Kontaktperson {
 	}
 }
 
-function checkDataProperties($obj, $props){
-	foreach($props as $prop){
-		if (!property_exists($obj, $prop)){
-			return false;
-		}
-	}
-	return true;
+class HttpBasicAuth extends \Slim\Middleware {
+    /**
+     * @var string
+     */
+    protected $realm;
+    /**
+     * @var string
+     */
+    protected $username;
+    /**
+     * @var string
+     */
+    protected $password;
+    /**
+     * Constructor
+     *
+     * @param   string  $username   The HTTP Authentication username
+     * @param   string  $password   The HTTP Authentication password
+     * @param   string  $realm      The HTTP Authentication realm
+     */
+    public function __construct($username, $password, $realm = 'Protected Area')
+    {
+        $this->username = $username;
+        $this->password = $password;
+        $this->realm = $realm;
+    }
+    /**
+     * Call
+     *
+     * This method will check the HTTP request headers for previous authentication. If
+     * the request has already authenticated, the next middleware is called. Otherwise,
+     * a 401 Authentication Required response is returned to the client.
+     */
+    public function call()
+    {
+        $req = $this->app->request();
+        $res = $this->app->response();
+        $authUser = $req->headers('PHP_AUTH_USER');
+        $authPass = $req->headers('PHP_AUTH_PW');
+        if ($authUser && $authPass && $authUser === $this->username && $authPass === $this->password) {
+            $this->next->call();
+        } else {
+            $res->status(401);
+            $res->header('WWW-Authenticate', sprintf('Basic realm="%s"', $this->realm));
+        }
+    }
 }
-
-
-\Slim\Slim::registerAutoloader();
 
 $familien = array();	
 
 $app = new \Slim\Slim();
+$app->add(new HttpBasicAuth('theUsername', 'thePassword'));
 $db = new SQLite3('kindergarten.db');
+//Foreign Keys aktivieren
+$db->query("PRAGMA foreign_keys = ON;");
 /*
 REST API Befehle:
 extend=FELDNAME,... Gibt Detaildaten auch für die angegebenen Felder zurück
@@ -305,40 +406,97 @@ $app->get('/familien', function() use ($db) {
 	$familien = array();
 	while($row = $result->fetchArray()){
 		$familie = new Familie();
-		$familie->initFromDb($db, $row['id'], array('kontaktpersonen', 'kinder'));
+		$familie->read($db, $row['id'], array('kontaktpersonen', 'kinder'));
 				
 		$familien[] = $familie;
 	}	
 	echo json_encode($familien);
 });
 
+//Erzeugt eine neue Familie
+$app->post('/familien', function() use ($db, $app){
+	$familie = new Familie();
+	$familieData = json_decode($app->request->getBody());
+	
+	if(!$familie->hasRequiredProperties($familieData)){
+		$app->halt(400);
+	}
+	
+	$familie->setProperties($familieData);
+	
+	if($familie->create($db)){
+		$familie->read($db, $familie->id);
+		echo(json_encode($familie));
+		$app->response->setStatus(201);
+		$app->response->headers->set('Location', $app->request->getUrl().$app->request->getRootUri().'/familien/'.$familie->id);
+	}
+	else{
+		$app->halt(400);
+	}
+});
+
 //Gibt die Familie mit der ID :id zurück
 $app->get('/familien/:id', function($id) use ($db){
 	$familie = new Familie();
-	$familie->initFromDb($db, $id, array('kontaktpersonen', 'kinder'));	
+	$familie->read($db, $id, array('kontaktpersonen', 'kinder'));	
 	echo json_encode($familie);
+});
+
+//Aktualisiert die Daten der Familie mit der ID :id
+$app->put('/familien/:id', function($id) use ($db, $app){
+	$familie = new Familie();
+	$familie->read($db, $id);
+	
+	$familieData = json_decode($app->request->getBody());
+	
+	//Prüfen, ob alle gesetzten Eigenschaften auch Eigenschaft eines Kontakts ist
+	if (!$familie->hasValidProperties($familieData)){
+		$app->halt(400);
+	}
+	
+	$familie->setProperties($familieData);
+
+	if($familie->update($db)){
+		$app->response->headers->set('Content-Type', 'application/json');
+		$familie->read($db, $id);
+		echo json_encode($familie);
+		$app->response->setStatus(200);
+	}
+	else{
+		$app->response->setStatus(400);
+	}
+});
+
+//Löscht die Familie mit der ID :id zurück
+$app->delete('/familien/:id', function($id) use ($db, $app){
+	$familie = new Familie();
+	$familie->read($db, $id);	
+	if($familie->delete($db)){
+		$app->response->setStatus(204);
+	}
+	else{
+		$app->response->setStatus(404);
+	}
 });
 
 //Gibt die Kontaktpersonen er Familie mit der ID :id zurück
 $app->get('/familien/:id/kontaktpersonen', function($id) use ($db){
 	$familie = new Familie();
-	$familie->initFromDb($db, $id, array('kontaktpersonen'));	
+	$familie->read($db, $id, array('kontaktpersonen'));	
 	echo json_encode($familie->kontaktpersonen);
 });
 
 //Erzeugt eine neue Kontaktperson in der Familie
-$app->post('/familien/:familienIdid/kontaktpersonen', function($familienId) use ($db, $app){
+$app->post('/familien/:familienId/kontaktpersonen', function($familienId) use ($db, $app){
 	$kontaktperson = new Kontaktperson();
 	$kontaktData = json_decode($app->request->getBody());
-	$requiredDataFields= array("name", "vorname", "kommentar", "email", "istStandardEmailKontakt", "mobilNr", "festnetzNr", "sonstNr");
 	
-	if(!checkDataProperties($kontaktData, $requiredDataFields)){
+	
+	if(!$kontaktperson->hasRequiredProperties($kontaktData)){
 		$app->halt(400);
 	}
 	
-	foreach($requiredDataFields as $field){
-		$kontaktperson->$field = $kontaktData->$field;
-	}
+	$kontaktperson->setProperties($kontaktData);
 	
 	if($kontaktperson->create($db, $familienId)){
 		$kontaktperson->read($db, $kontaktperson->id);
@@ -369,13 +527,11 @@ $app->put('/familien/:familienId/kontaktpersonen/:id', function($familienId, $id
 	$kontaktData = json_decode($app->request->getBody());
 	
 	//Prüfen, ob alle gesetzten Eigenschaften auch Eigenschaft eines Kontakts ist
-	foreach(((array)$kontaktData) as $prop => $val)
-	{
-		if (!property_exists($kontaktperson, $prop)){
-			$app->halt(400, "Unknown Property: ".$prop);
-		}
-		$kontaktperson->$prop = $kontaktData->$prop;
+	if (!$kontaktperson->hasValidProperties($kontaktData)){
+		$app->halt(400);
 	}
+	
+	$kontaktperson->setProperties($kontaktData);
 
 	if($kontaktperson->update($db)){
 		$app->response->headers->set('Content-Type', 'application/json');
@@ -402,7 +558,7 @@ $app->delete('/familien/:familienId/kontaktpersonen/:id', function($familienId, 
 //Gibt die Kinder der Familie mit der ID :id zurück
 $app->get('/familien/:id/kinder', function($id) use ($db){
 	$familie = new Familie();
-	$familie->initFromDb($db, $id, array('kinder'));	
+	$familie->read($db, $id, array('kinder'));	
 	echo json_encode($familie->kinder);
 });
 
@@ -411,21 +567,17 @@ $app->post('/familien/:id/kinder', function($id) use ($db, $app){
 	$kind = new Kind();
 	$kindData = json_decode($app->request->getBody());
 	
-	if(!(isset($kindData->name)&&(isset($kindData->vorname))&&(isset($kindData->schlagwoerter)))){
+	if(!$kind->hasRequiredProperties($kindData)){
 		$app->halt(400);
 	}
 	
-	$kind->name = $kindData->name;
-	$kind->vorname = $kindData->vorname;
-	$kind->schlagwoerter = $kindData->schlagwoerter;
+	$kind->setRequiredProperties($kindData);
 	
-	$newId = $kind->create($db, $id);
-	
-	if($newId){
-		$kind->initFromDb($db, $newId);
+	if($kind->create($db, $id)){
+		$kind->initFromDb($db, $kind->id);
 		echo(json_encode($kind));
 		$app->response->setStatus(201);
-		$app->response->headers->set('Location', $app->request->getUrl().$app->request->getRootUri().'/familien/'.$id.'/kinder/'.$newId);
+		$app->response->headers->set('Location', $app->request->getUrl().$app->request->getRootUri().'/familien/'.$id.'/kinder/'.$kind->id);
 	}
 	else{
 		$app->response->setStatus(401);
@@ -439,18 +591,13 @@ $app->put('/familien/:familienId/kinder/:id', function($familienId, $id) use ($d
 	
 	$kindData = json_decode($app->request->getBody());
 	
-	if(isset($kindData->name)){
-		$kind->name = $kindData->name;
+	//Prüfen, ob alle gesetzten Eigenschaften auch Eigenschaft eines Kontakts ist
+	if (!$kind->hasValidProperties($kindData)){
+		$app->halt(400);
 	}
 	
-	if(isset($kindData->name)){
-		$kind->vorname = $kindData->vorname;
-	}
-	
-	if(isset($kindData->schlagwoerter)){
-		$kind->schlagwoerter = $kindData->schlagwoerter;
-	}
-	
+	$kind->setProperties($kindData);
+
 	if($kind->update($db)){
 		$app->response->headers->set('Content-Type', 'application/json');
 		echo json_encode($kind);
@@ -477,21 +624,6 @@ $app->delete('/familien/:familienId/kinder/:id', function($familienId, $id) use(
 	else{
 		$app->response->setStatus(404);
 	}
-});
-
-//Aktualisiert die Daten der Familie mit der ID :id
-$app->put('/familien/:id', function($id) use ($familien){
-	echo json_encode($familien);
-});
-
-//Erzeugt eine neue Familie
-$app->post('/familien', function($id) use ($familien){
-	echo json_encode($familien);
-});
-
-//Löscht die Familie mit der ID :id zurück
-$app->delete('/familien/:id', function($id) use ($familien){
-	echo json_encode($familien);
 });
 
 //Gibt alle Kinder zurück
@@ -540,12 +672,6 @@ $app->get('/schlagwoerter/:id/kinder', function($id) use ($db, $app){
 	$app->response->headers->set('Content-Type', 'application/json');
 	echo json_encode($kinder);
 });
-
-//Gibt alle Gruppen zurück
-$app->get('/gruppen', function() use ($familien){
-	echo json_encode($familien);
-});
-
 
 $app->run();
 ?>

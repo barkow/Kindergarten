@@ -1,10 +1,13 @@
+PRAGMA foreign_keys = ON;
+
 DROP TABLE familien;
-CREATE table familien(	id INTEGER PRIMARY KEY AUTOINCREMENT, 
+CREATE table familien(	
+			id INTEGER PRIMARY KEY AUTOINCREMENT, 
 			name TEXT);
 
-
 DROP TABLE kontaktpersonen;
-CREATE table kontaktpersonen(	id INTEGER PRIMARY KEY AUTOINCREMENT, 
+CREATE table kontaktpersonen(	
+				id INTEGER PRIMARY KEY AUTOINCREMENT, 
 				name TEXT, 
 				vorname TEXT, 
 				email TEXT,
@@ -12,33 +15,44 @@ CREATE table kontaktpersonen(	id INTEGER PRIMARY KEY AUTOINCREMENT,
 				mobilNr TEXT, 
 				festnetzNr TEXT, 
 				sonstNr TEXT,
+				anschrift TEXT,
 				kommentar TEXT, 
-				familienId INTEGER,
-				FOREIGN KEY (familienId) REFERENCES familien(id));
+				familienId INTEGER REFERENCES familien(id) ON DELETE CASCADE);
 
 DROP table kinder;
-CREATE table kinder(		id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE table kinder(		
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
 				name TEXT,
 				vorname TEXT,
-				familienId INTEGER,
-				FOREIGN KEY (familienId) REFERENCES familien(id));
+				geburtsdatum TEXT,
+				familienId INTEGER REFERENCES familien(id) ON DELETE CASCADE);
 
 DROP table schlagwoerter;
-CREATE table schlagwoerter(	id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE table schlagwoerter(	
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
 				bezeichnung TEXT UNIQUE,
 				kommentar TEXT);
 				
 DROP table kinderschlagwoerter;
-CREATE table kinderschlagwoerter(	id INTEGER PRIMARY KEY AUTOINCREMENT,
-				kinderId INTEGER,
-				schlagwoerterId INTEGER,
-				FOREIGN KEY (kinderId) REFERENCES kinder(id),
-				FOREIGN KEY (schlagwoerterId) REFERENCES schlagwoerter(id));
+CREATE table kinderschlagwoerter(	
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				kinderId INTEGER REFERENCES kinder(id) ON DELETE CASCADE,
+				schlagwoerterId INTEGER REFERENCES schlagwoerter(id) ON DELETE CASCADE);
 
 INSERT INTO schlagwoerter(id, bezeichnung) VALUES
-	(1, 'Waldkind'),
-	(2, 'Turngruppe 1'),
-	(3, 'Turngruppe 2');
+	(1, 'Gruppe blau'),
+	(2, 'Gruppe grün'),
+	(3, 'Gruppe rot'),
+	(4, 'Stunden 35'),
+	(5, 'Stunden 45'),
+	(6, 'Waldkind'),
+	(7, 'Schwimmkind'),
+	(8, 'Vorschulkind'),
+	(9, 'Turngruppe U2'),
+	(10, 'Turngruppe 2-3'),
+	(11, 'Turngruppe 3-4'),
+	(12, 'Turngruppe 4-5'),
+	(13, 'Turngruppe 5-6');
 
 INSERT INTO familien(id, name) VALUES 
 	(1,'Auerbach');

@@ -1,4 +1,4 @@
-define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections'], function($, ko, router) {
+define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections','select2-ko-binding'], function($, ko, router) {
 
   // Components can be packaged as AMD modules, such as the following:
   ko.components.register('nav-bar', { require: 'components/nav-bar/nav-bar' });
@@ -20,6 +20,8 @@ define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections'], 
   ko.components.register('taglist-page', { require: 'components/taglist-page/taglist-page' });
   
   ko.components.register('contact-details-page', { require: 'components/contact-details-page/contact-details-page' });
+  
+  ko.components.register('login-page', { require: 'components/login-page/login-page' });
   
   // [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
 

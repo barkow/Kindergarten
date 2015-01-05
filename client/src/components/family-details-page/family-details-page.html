@@ -19,46 +19,53 @@
     </div>
 </form>
 
-<h3>Kinder</h3>
-<div class="row">
-    <div class="col-md-8"></div>
-    <div class="col-md-1"></div>
-    <div class="col-md-1"></div>
-    <div class="col-md-1"></div>
-    <div class="col-md-1">
-        <a data-bind="attr: {href: '#familydetails/' + id + '/childdetails'}" class="btn btn-default btn-xs" role="button"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>
+<div data-bind="visible: id">
+    <h3>Kinder</h3>
+    <div class="row">
+        <div class="col-md-8"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1">
+            <a data-bind="attr: {href: '#familydetails/' + id + '/childdetails'}" class="btn btn-default btn-xs" role="button"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>
+        </div>
     </div>
-</div>
-<div>
-    <table class="table table-striped">
-        <thead>
-            <tr><th>Vorname</th><th>Name</th></tr>
-        </thead>
-        <tbody data-bind="foreach: children">
-            <tr><td><a data-bind="text: vorname, attr: {href: '#familydetails/'+$parent.id+'/childdetails/'+id}"></a></td><td data-bind="text: name"></td></tr>
-        </tbody>
-    </table>
-</div>
-         
-<h3>Kontaktpersonen</h3>
-<div class="row">
-    <div class="col-md-8"></div>
-    <div class="col-md-1"></div>
-    <div class="col-md-1"></div>
-    <div class="col-md-1"></div>
-    <div class="col-md-1">
-        <a data-bind="attr: {href: '#familydetails/' + id + '/contactdetails'}" class="btn btn-default btn-xs" role="button"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>
+    <div>
+        <table class="table table-striped">
+            <thead>
+                <tr><th>Vorname</th><th>Name</th></tr>
+            </thead>
+            <tbody data-bind="foreach: children">
+                <tr><td><a data-bind="text: vorname, attr: {href: '#familydetails/'+$parent.id+'/childdetails/'+id}"></a></td><td data-bind="text: name"></td></tr>
+            </tbody>
+        </table>
     </div>
-</div>
-<div>
-    <table class="table table-striped">
-        <thead>
-            <tr><th>Vorname</th><th>Name</th><th>Kommentar</th></tr>
-        </thead>
-        <tbody data-bind="foreach: contacts">
-            <tr><td><a data-bind="text: vorname, attr: {href: '#familydetails/'+$parent.id+'/contactdetails/'+id}"></a></td><td data-bind="text: name"></td><td data-bind="text: kommentar"></td></tr>
-        </tbody>
-    </table>
 </div>
 
-<confirm-modal></confirm-modal>
+<div data-bind="visible: id">
+    <h3>Kontaktpersonen</h3>
+    <div class="row">
+        <div class="col-md-8"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-1">
+            <a data-bind="attr: {href: '#familydetails/' + id + '/contactdetails'}" class="btn btn-default btn-xs" role="button"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>
+        </div>
+    </div>
+    <div>
+        <table class="table table-striped">
+            <thead>
+                <tr><th>Vorname</th><th>Name</th><th>Kommentar</th></tr>
+            </thead>
+            <tbody data-bind="foreach: contacts">
+                <tr><td><a data-bind="text: vorname, attr: {href: '#familydetails/'+$parent.id+'/contactdetails/'+id}"></a></td><td data-bind="text: name"></td><td data-bind="text: kommentar"></td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<form role="form">
+    <button type="button" class="btn btn-primary" data-bind="click: closeClick">Schließen</button>
+    <button type="button" class="btn btn-default" data-bind="click: saveClick, attr:{disabled: !editMode()}">Speichern</button>
+</form>

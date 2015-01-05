@@ -1,41 +1,73 @@
-define(['knockout', 'text!./family-details-page.html'], function(ko, templateMarkup) {
+define(['knockout', 'text!./family-details-page.html', 'hasher'], function(ko, templateMarkup, hasher) {
 
   function FamilydetailsPage(params) {
     var self = this;
-    
-    self.id = params.familyId;
+		
+    self.id = params.route.familyId;
     self.name = ko.observable();
     self.children = ko.observableArray();
 	  self.contacts = ko.observableArray();
-	  self.editMode = ko.observable(false);
-	 
-	  self.enableFamilienEditMode = function(data, event){
-		  self.familienEditMode(true);
-	  }
+	  self.editMode = ko.observable(true);
+	  
+	  self.writeData = function(data){
+      self.name(data.name);
+      self.children.removeAll();
+			$.each(data.kinder, function(index, value){
+				self.children.push(value);
+			});
+			self.contacts.removeAll();
+			$.each(data.kontaktpersonen, function(index, value){
+				self.contacts.push(value);
+			});
+    };
 	  
 	  self.getFamily = function(){
-		  $.getJSON("/server/API/familien/" + self.id, function(data) { 
-			  console.log(data);
-			  self.name(data.name);
-			  $.each(data.kinder, function(index, value){
-				  self.children.push(value);
-			  });
-			  $.each(data.kontaktpersonen, function(index, value){
-				  console.log(value);
-				  self.contacts.push(value);
-			  });
-		  });
+		  $.getJSON("/server/API/familien/" + self.id, self.writeData);
+	  };
+	  
+	  self.closeClick = function(){
+	    if(params.oldroute){
+	      hasher.setHash("families");
+	    }
+	  };
+	  
+	  self.saveClick = function(){
+	    var data = JSON.stringify({name: self.name()});
+	    //Wenn id gesetzt ist, dann muss ein Update durchgeführt werden, sonst ein Create
+	    if (self.id){
+	      $.ajax({
+	        url: "/server/API/familien/"+self.id,
+	        type: "PUT",
+	        dataType: 'json',
+	        data: data
+        }).done(function(data) {
+          self.editMode(false);
+          //writeData wird hier nicht ausgeführt, da der PUT Befehl nicht vollständige Informationen über Kinder und Kontaktpersonen zurückliefert
+          //self.writeData(data);
+        });
+	    }
+	    else{
+	      $.ajax({
+	        url: "/server/API/familien",
+	        type: "POST",
+	        dataType: 'json',
+	        data: data
+        }).done(function() {
+          self.closeClick();
+        });
+	    }
 	  };
 	  
 	  self.deleteFamily = function(){
-	    if(confirm("Soll Familie " + self.name() + " wirklich gelöscht werden")){
-	      $.ajax({
-	        url: "/server/API/familien/"+self.id,
-	        type: "DELETE"
-        }).done(function() {
-          console.log("deleted");
-          location.href = "#families";
-        });
+	    if(self.id){
+	      if(confirm("Soll Familie " + self.name() + " wirklich gelöscht werden")){
+  	      $.ajax({
+  	        url: "/server/API/familien/"+self.id,
+  	        type: "DELETE"
+          }).done(function() {
+            self.closeClick();
+          });
+	      }
 	    }
 	  };
 	  
@@ -43,6 +75,7 @@ define(['knockout', 'text!./family-details-page.html'], function(ko, templateMar
 	  //Wenn id nicht gesetzt, soll ein neuer Datensatz angelegt werden
 	  if (self.id){
 	    self.getFamily();
+	    self.editMode(false);
 	  }
   }
 
