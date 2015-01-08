@@ -608,7 +608,7 @@ $app->put('/familien/:familienId/kinder/:id', function($familienId, $id) use ($d
 	}
 });
 
-$app->get('/familien/:familienId/kinder/:id', function($familienId, $id) use($db){
+$app->get('/familien/:familienId/kinder/:id', function($familienId, $id) use($db,$app){
 	$kind = new Kind();
 	$kind->initFromDb($db, $id);
 	$app->response->headers->set('Content-Type', 'application/json');

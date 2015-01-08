@@ -6,15 +6,28 @@ define(['knockout', 'text!./families-page.html', 'hasher'], function(ko, templat
     self.families = ko.observableArray();
     
     self.getFamilies = function(){
-      $.getJSON("/server/API/familien", function(data) { 
+      console.log(params.auth.username());
+      $.ajax({
+	        url: "/server/API/familien",
+	        type: "GET",
+	        dataType: 'json',
+	        username: params.auth.username(),
+	        password: params.auth.password()
+        }).done(function(data) {
+          self.families.removeAll();
+          $.each(data, function(index, value){
+            self.families.push(value);
+          });
+        });
+      /*$.getJSON("", function(data) { 
         self.families.removeAll();
         $.each(data, function(index, value){
           self.families.push(value);
         });
 		  }).error(function(data){
 		    console.log(data); 
-		    hasher.setHash('login');
-		  });
+		    //hasher.setHash('login');
+		  });*/
     };
     
     self.getFamilies();

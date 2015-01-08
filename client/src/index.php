@@ -1,3 +1,11 @@
+<?php
+if (!isset($_SERVER['PHP_AUTH_USER'])) {
+    //header('WWW-Authenticate: Basic realm="My Realm"');
+    //header('HTTP/1.0 401 Unauthorized');
+    //echo 'Text, der gesendet wird, falls der Benutzer auf Abbrechen drückt';
+    //exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -16,7 +24,11 @@
     <!-- endbuild -->
   </head>
   <body>
+    <?php if (true || !isset($_SERVER['PHP_AUTH_USER'])): ?>
     <nav-bar params="route: route"></nav-bar>
-    <div id="page" class="container" data-bind="component: { name: route().page, params: {route: route(), oldroute: oldRoute() } }"></div>
+    <div id="page" class="container" data-bind="component: { name: route().page, params: {route: route(), oldroute: oldRoute(), auth: authData } }"></div>
+    <?php else: ?>
+    <div id="page" class="container" data-bind="component: { name: 'login-page', params: {route: route(), oldroute: oldRoute() } }"></div>
+    <?php endif; ?>
   </body>
 </html>

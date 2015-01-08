@@ -21,6 +21,7 @@
     },
     "run": {
         "@path": "/.c9/runners",
+        "@runner": "Apache httpd (PHP, HTML)",
         "configs": {
             "@inited": "true",
             "json()": {}

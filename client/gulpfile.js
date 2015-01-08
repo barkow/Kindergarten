@@ -23,6 +23,7 @@ var requireJsRuntimeConfig = vm.runInNewContext(fs.readFileSync('src/app/require
             'components/child-details-page/child-details-page',
             'components/contact-details-page/contact-details-page',
             'components/taglist-page/taglist-page',
+            'components/login-page/login-page',
             'text!components/about-page/about.html'
         ],
         insertRequire: ['app/startup'],
@@ -57,7 +58,7 @@ gulp.task('css', function () {
 
 // Copies index.html, replacing <script> and <link> tags to reference production URLs
 gulp.task('html', function() {
-    return gulp.src('./src/index.html')
+    return gulp.src('./src/index.php')
         .pipe(htmlreplace({
             'css': 'css.css',
             'js': 'scripts.js'

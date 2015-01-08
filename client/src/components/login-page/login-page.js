@@ -1,7 +1,9 @@
-define(['knockout', 'text!./login-page.html'], function(ko, templateMarkup) {
+define(['knockout', 'text!./login-page.html', 'hasher'], function(ko, templateMarkup, hasher) {
 
   function LoginPage(params) {
-    this.message = ko.observable('Hello from the login-page component!');
+    var self = this;
+    self.username  = params.auth.username;
+    self.password = params.auth.password;
   }
 
   // This runs when the component is torn down. Put here any logic necessary to clean up,

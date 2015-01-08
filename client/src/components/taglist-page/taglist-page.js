@@ -20,22 +20,35 @@ define(['knockout', 'select2', 'text!./taglist-page.html', 'select2-ko-binding']
     
     self.updateChildren = ko.computed(function(){
       if (self.selectedTag()){
-      $.getJSON("/server/API/schlagwoerter/"+self.selectedTag()+"/kinder", function(data) { 
-        self.children.removeAll();
-        $.each(data, function(index, child){
-          self.children.push(child);
+        $.ajax({
+	        url: "/server/API/schlagwoerter/"+self.selectedTag()+"/kinder",
+	        type: "GET",
+	        dataType: 'json',
+	        username: params.auth.username(),
+	        password: params.auth.password()
+        }).done(function(data) {
+           self.children.removeAll();
+          $.each(data, function(index, child){
+            self.children.push(child);
+          });
         });
-		  });
       }
     });
     
     self.getAvailableTags = function(){
       self.availableTags.removeAll();
-      $.getJSON("/server/API/schlagwoerter", function(data) { 
+
+		  $.ajax({
+		    url: "/server/API/schlagwoerter",
+	      type: "GET",
+	      dataType: 'json',
+	      username: params.auth.username(),
+	      password: params.auth.password()
+      }).done(function(data) {
         $.each(data, function(index, tag){
           self.availableTags.push(tag);
         });
-		  });
+      });
     };
     
     self.getAvailableTags();

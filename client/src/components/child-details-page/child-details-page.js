@@ -35,7 +35,6 @@ define(['knockout', 'select2', 'text!./child-details-page.html', 'hasher', 'sele
 	  
 	  self.closeClick = function(){
 	    if(params.oldroute){
-	      //location.href = params.oldroute;
 	      hasher.setHash(params.oldroute);
 	    }
 	  };
