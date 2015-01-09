@@ -4,12 +4,18 @@ define(["knockout", "jquery", "hasher"], function(ko, $, hasher) {
         
         self.username = ko.observable('username');
         self.password = ko.observable('password');
+        
+        $( document ).ajaxSend(function(event, jqxhr, settings) {
+            jqxhr.setRequestHeader('Authorization', "Basic " + btoa(self.username() + ":" + self.password()));
+        });
     }
     
-    $( document ).ajaxError(function(data) {
-        console.log('ajax error');
-        console.log(data);
-        hasher.setHash('login');
+    $( document ).ajaxError(function(jqXHR, textStatus, errorThrown) {
+        //Wenn Auth Fehler, dann auf Login Seite umleiten
+        if (textStatus.status == 403){
+            hasher.setHash('login');
+        }
     });
+    
     return new Auth();
 });

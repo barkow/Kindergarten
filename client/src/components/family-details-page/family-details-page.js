@@ -22,7 +22,13 @@ define(['knockout', 'text!./family-details-page.html', 'hasher'], function(ko, t
     };
 	  
 	  self.getFamily = function(){
-		  $.getJSON("/server/API/familien/" + self.id, self.writeData);
+	  	$.ajax({
+        url: "/server/API/familien/" + self.id,
+	      type: "GET",
+	      dataType: 'json',
+	      username: params.auth.username(),
+	      password: params.auth.password()
+      }).done(self.writeData);
 	  };
 	  
 	  self.closeClick = function(){
@@ -39,7 +45,9 @@ define(['knockout', 'text!./family-details-page.html', 'hasher'], function(ko, t
 	        url: "/server/API/familien/"+self.id,
 	        type: "PUT",
 	        dataType: 'json',
-	        data: data
+	        data: data,
+	        username: params.auth.username(),
+	      	password: params.auth.password()
         }).done(function(data) {
           self.editMode(false);
           //writeData wird hier nicht ausgeführt, da der PUT Befehl nicht vollständige Informationen über Kinder und Kontaktpersonen zurückliefert
@@ -51,7 +59,9 @@ define(['knockout', 'text!./family-details-page.html', 'hasher'], function(ko, t
 	        url: "/server/API/familien",
 	        type: "POST",
 	        dataType: 'json',
-	        data: data
+	        data: data,
+	        username: params.auth.username(),
+	      	password: params.auth.password()
         }).done(function() {
           self.closeClick();
         });
@@ -63,7 +73,9 @@ define(['knockout', 'text!./family-details-page.html', 'hasher'], function(ko, t
 	      if(confirm("Soll Familie " + self.name() + " wirklich gelöscht werden")){
   	      $.ajax({
   	        url: "/server/API/familien/"+self.id,
-  	        type: "DELETE"
+  	        type: "DELETE",
+  	        username: params.auth.username(),
+	      		password: params.auth.password()
           }).done(function() {
             self.closeClick();
           });

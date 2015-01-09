@@ -9,5 +9,5 @@
         <label for="inputPassword">Name</label>
         <input type="password" class="form-control" id="inputPassword" data-bind="value: password">
     </div>
-    <button type="button" class="btn btn-primary" data-bind="click: function(){console.log(params); if (params.oldRoute){hasher.setHash(params.oldRoute);}}">Login</button>
+    <button type="button" class="btn btn-primary" data-bind="click: loginClick">Login</button>
 </form>

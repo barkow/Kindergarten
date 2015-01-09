@@ -17,7 +17,13 @@ define(['knockout', 'jquery', 'text!./contact-details-page.html', 'hasher', 'jqu
     
     
     self.getContact = function(){
-      $.getJSON("/server/API/familien/"+self.familyId+"/kontaktpersonen/"+self.id, function(data) { 
+    	$.ajax({
+        url: "/server/API/familien/"+self.familyId+"/kontaktpersonen/"+self.id,
+	      type: "GET",
+	      dataType: 'json',
+	      username: params.auth.username(),
+	      password: params.auth.password()
+      }).done(function(data) {
         self.surname(data.name);
         self.givenname(data.vorname);
         self.comment(data.kommentar);
@@ -26,7 +32,7 @@ define(['knockout', 'jquery', 'text!./contact-details-page.html', 'hasher', 'jqu
     		self.mobileNo(data.mobilNr);
     		self.landlineNo(data.festnetzNr);
     		self.additionalNo(data.sonstNr);
-		  });
+      });
 	  };
 	  
 	  self.closeClick = function(){
@@ -51,7 +57,9 @@ define(['knockout', 'jquery', 'text!./contact-details-page.html', 'hasher', 'jqu
 	          mobilNr: self.mobileNo(),
 	          festnetzNr: self.landlineNo(),
 	          sonstNr: self.additionalNo()
-	        })
+	        }),
+	        username: params.auth.username(),
+	      	password: params.auth.password()
         }).done(function() {
           self.editMode(false);
         });
@@ -70,7 +78,9 @@ define(['knockout', 'jquery', 'text!./contact-details-page.html', 'hasher', 'jqu
 	          mobilNr: self.mobileNo(),
 	          festnetzNr: self.landlineNo(),
 	          sonstNr: self.additionalNo()
-	        })
+	        }),
+	        username: params.auth.username(),
+	      	password: params.auth.password()
         }).done(function() {
           self.closeClick();
         });
@@ -82,7 +92,9 @@ define(['knockout', 'jquery', 'text!./contact-details-page.html', 'hasher', 'jqu
 	      if(confirm("Soll Kontaktperson " + self.givenname() + " " + self.surname() + " wirklich gelöscht werden")){
   	      $.ajax({
   	        url: "/server/API/familien/"+self.familyId+'/kontaktpersonen/'+self.id,
-  	        type: "DELETE"
+  	        type: "DELETE",
+  	        username: params.auth.username(),
+	      		password: params.auth.password()
           }).done(function() {
             self.closeClick();
           });

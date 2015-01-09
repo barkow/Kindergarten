@@ -7,6 +7,7 @@ define(['knockout', 'text!./families-page.html', 'hasher'], function(ko, templat
     
     self.getFamilies = function(){
       console.log(params.auth.username());
+      $("body").css("cursor", "progress");
       $.ajax({
 	        url: "/server/API/familien",
 	        type: "GET",
@@ -18,16 +19,9 @@ define(['knockout', 'text!./families-page.html', 'hasher'], function(ko, templat
           $.each(data, function(index, value){
             self.families.push(value);
           });
+        }).always(function(){
+          $("body").css("cursor", "auto");
         });
-      /*$.getJSON("", function(data) { 
-        self.families.removeAll();
-        $.each(data, function(index, value){
-          self.families.push(value);
-        });
-		  }).error(function(data){
-		    console.log(data); 
-		    //hasher.setHash('login');
-		  });*/
     };
     
     self.getFamilies();

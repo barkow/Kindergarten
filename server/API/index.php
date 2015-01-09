@@ -64,7 +64,7 @@ class Familie extends DbObject {
 		}
 
 		//Zugehörige Kontaktpersonen bestimmen
-		$stmt = $db->prepare('SELECT id FROM kontaktpersonen WHERE familienId=:id;');
+		$stmt = $db->prepare('SELECT id FROM kontaktpersonen WHERE familienId=:id ORDER BY name,vorname;');
 		$stmt->bindValue(':id', $id);
 		$result = $stmt->execute();
 		while($row = $result->fetchArray()){
@@ -80,7 +80,7 @@ class Familie extends DbObject {
 		}
 		
 		//Zugehörige Kinder bestimmen
-		$stmt = $db->prepare('SELECT id FROM kinder WHERE familienId=:id;');
+		$stmt = $db->prepare('SELECT id FROM kinder WHERE familienId=:id ORDER BY name,vorname;');
 		$stmt->bindValue(':id', $id);
 		$result = $stmt->execute();
 		while($row = $result->fetchArray()){
@@ -358,10 +358,9 @@ class HttpBasicAuth extends \Slim\Middleware {
      * @param   string  $password   The HTTP Authentication password
      * @param   string  $realm      The HTTP Authentication realm
      */
-    public function __construct($username, $password, $realm = 'Protected Area')
+    public function __construct($db, $realm = 'Protected Area')
     {
-        $this->username = $username;
-        $this->password = $password;
+        $this->db = $db;
         $this->realm = $realm;
     }
     /**
@@ -377,22 +376,38 @@ class HttpBasicAuth extends \Slim\Middleware {
         $res = $this->app->response();
         $authUser = $req->headers('PHP_AUTH_USER');
         $authPass = $req->headers('PHP_AUTH_PW');
-        if ($authUser && $authPass && $authUser === $this->username && $authPass === $this->password) {
+        $dbUserAuthenticated = false;
+        if ($authUser && $authPass){
+        	$stmt = $this->db->prepare('SELECT * FROM user WHERE username=:username AND password=:password;');
+        	$stmt->bindValue(':username', $authUser);
+        	$stmt->bindValue(':password', $authPass);
+			$result = $stmt->execute();
+			if($row = $result->fetchArray()){
+				$dbUserAuthenticated = true;
+			}
+        }
+        
+        if ($authUser && $authPass && $dbUserAuthenticated) {
             $this->next->call();
-        } else {
-            $res->status(401);
-            $res->header('WWW-Authenticate', sprintf('Basic realm="%s"', $this->realm));
+        } 
+        else {
+        	//Statuscode 403 statt 401 zurückliefern, damit Browser kein Auth Fenster öffnet
+            $res->setStatus(403);
+            //Auth Header nicht setzen, da Statuscode sonst irgendwie auf 401 geändert wird
+            //$res->header('WWW-Authenticate', sprintf('Basic realm="%s"', $this->realm));
         }
     }
 }
 
 $familien = array();	
 
-$app = new \Slim\Slim();
-$app->add(new HttpBasicAuth('theUsername', 'thePassword'));
 $db = new SQLite3('kindergarten.db');
 //Foreign Keys aktivieren
 $db->query("PRAGMA foreign_keys = ON;");
+
+$app = new \Slim\Slim();
+$app->add(new HttpBasicAuth($db));
+
 /*
 REST API Befehle:
 extend=FELDNAME,... Gibt Detaildaten auch für die angegebenen Felder zurück
@@ -401,7 +416,7 @@ fields=FELDNAME,... Gibt nur die in fields angegebenen Felder eines Datensatzes 
 
 //Gibt alle Familen zurück
 $app->get('/familien', function() use ($db) {
-	$stmt = $db->prepare('SELECT id FROM familien;');
+	$stmt = $db->prepare('SELECT id FROM familien ORDER BY name;');
 	$result = $stmt->execute();
 	$familien = array();
 	while($row = $result->fetchArray()){
@@ -580,7 +595,7 @@ $app->post('/familien/:id/kinder', function($id) use ($db, $app){
 		$app->response->headers->set('Location', $app->request->getUrl().$app->request->getRootUri().'/familien/'.$id.'/kinder/'.$kind->id);
 	}
 	else{
-		$app->response->setStatus(401);
+		$app->response->setStatus(403);
 	}
 });
 
@@ -627,25 +642,15 @@ $app->delete('/familien/:familienId/kinder/:id', function($familienId, $id) use(
 });
 
 //Gibt alle Kinder zurück
-$app->get('/kinder', function() use ($familien){
-	echo json_encode($familien);
-});
-
-//Gibt alle Kinder zurück
 $app->get('/kinder/:id', function($id) use($db){
 	$kind = new Kind();
 	$kind->initFromDb($db, $id);	
 	echo json_encode($kind);
 });
 
-//Gibt alle Kontaktpersonen zurück
-$app->get('/kontaktpersonen', function() use ($familien){
-	echo json_encode($familien);
-});
-
 //Gibt alle Schlagwörter zurück
 $app->get('/schlagwoerter', function() use ($db, $app){
-	$stmt = $db->prepare('SELECT id FROM schlagwoerter;');
+	$stmt = $db->prepare('SELECT id FROM schlagwoerter ORDER BY bezeichnung;');
 	$result = $stmt->execute();
 	$schlagwoerter = array();
 	while($row = $result->fetchArray()){
@@ -660,7 +665,7 @@ $app->get('/schlagwoerter', function() use ($db, $app){
 
 //Gibt alle Kinder zu einem Schlagwort zurück
 $app->get('/schlagwoerter/:id/kinder', function($id) use ($db, $app){
-	$stmt = $db->prepare('SELECT kinder.id FROM kinderschlagwoerter JOIN kinder ON kinder.id = kinderschlagwoerter.kinderId WHERE kinderschlagwoerter.schlagwoerterId=:id;');
+	$stmt = $db->prepare('SELECT kinder.id FROM kinderschlagwoerter JOIN kinder ON kinder.id = kinderschlagwoerter.kinderId WHERE kinderschlagwoerter.schlagwoerterId=:id ORDER BY kinder.name,kinder.vorname;');
 	$stmt->bindValue(':id', $id);
 	$result = $stmt->execute();
 	$kinder = array();

@@ -22,15 +22,27 @@ define(['knockout', 'select2', 'text!./child-details-page.html', 'hasher', 'sele
     
     self.getAvailableTags = function(){
       self.availableTags.removeAll();
-      $.getJSON("/server/API/schlagwoerter", function(data) { 
+      $.ajax({
+        url: "/server/API/schlagwoerter",
+	      type: "GET",
+	      dataType: 'json',
+	      username: params.auth.username(),
+	      password: params.auth.password()
+      }).done(function(data) {
         $.each(data, function(index, tag){
           self.availableTags.push(tag.bezeichnung);
         });
-		  });
+      });
     };
   
     self.getChild = function(){
-      $.getJSON("/server/API/kinder/"+self.id, self.writeData);
+      $.ajax({
+        url: "/server/API/kinder/"+self.id,
+	      type: "GET",
+	      dataType: 'json',
+	      username: params.auth.username(),
+	      password: params.auth.password()
+      }).done(self.writeData);
 	  };
 	  
 	  self.closeClick = function(){
@@ -47,7 +59,9 @@ define(['knockout', 'select2', 'text!./child-details-page.html', 'hasher', 'sele
 	        url: "/server/API/familien/"+self.familyId+'/kinder/'+self.id,
 	        type: "PUT",
 	        dataType: 'json',
-	        data: data
+	        data: data,
+	        username: params.auth.username(),
+	        password: params.auth.password()
         }).done(function(data) {
           self.editMode(false);
           self.writeData(data);
@@ -58,7 +72,9 @@ define(['knockout', 'select2', 'text!./child-details-page.html', 'hasher', 'sele
 	        url: "/server/API/familien/"+self.familyId+'/kinder',
 	        type: "POST",
 	        dataType: 'json',
-	        data: data
+	        data: data,
+	        username: params.auth.username(),
+	        password: params.auth.password()
         }).done(function() {
           self.closeClick();
         });
@@ -70,7 +86,9 @@ define(['knockout', 'select2', 'text!./child-details-page.html', 'hasher', 'sele
 	      if(confirm("Soll Kind " + self.name() + " wirklich gelöscht werden")){
   	      $.ajax({
   	        url: "/server/API/familien/"+self.familyId+'/kinder/'+self.id,
-  	        type: "DELETE"
+  	        type: "DELETE",
+  	        username: params.auth.username(),
+	          password: params.auth.password()
           }).done(function() {
             self.closeClick();
           });
