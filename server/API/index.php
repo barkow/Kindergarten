@@ -642,6 +642,21 @@ $app->delete('/familien/:familienId/kinder/:id', function($familienId, $id) use(
 });
 
 //Gibt alle Kinder zurück
+$app->get('/kinder', function() use ($db, $app){
+	$stmt = $db->prepare('SELECT id FROM kinder ORDER BY name,vorname;');
+	$result = $stmt->execute();
+	$kinder = array();
+	while($row = $result->fetchArray()){
+		$kind = new Kind();
+		$kind->initFromDb($db, $row['id']);
+				
+		$kinder[] = $kind;
+	}
+	$app->response->headers->set('Content-Type', 'application/json');
+	echo json_encode($kinder);
+});
+
+//Gibt alle Kinder zurück
 $app->get('/kinder/:id', function($id) use($db){
 	$kind = new Kind();
 	$kind->initFromDb($db, $id);	

@@ -1,0 +1,6 @@
+<div class="well" data-bind="visible: nextBirthdayChildren().length > 0">
+    <h4>Die nächsten Geburtstage</h4>
+    <ul class="list-group" data-bind="foreach: nextBirthdayChildren">
+        <li class="list-group-item" data-bind="text: new Date($data.geburtsdatum).toLocaleDateString() + ': ' + vorname + ' ' +name"></li>
+    </ul>
+</div>
