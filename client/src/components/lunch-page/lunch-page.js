@@ -44,9 +44,7 @@ define(['knockout', 'text!./lunch-page.html',"knockout-x-editable"], function(ko
     });
     
     self.newMonthClick = function(){
-      console.log(self.month());
-      console.log(self.lunches());
-      /*$.ajax({
+      $.ajax({
 	        url: "/server/API/mittagessen/monat",
 	        type: "POST",
 	        dataType: 'json',
@@ -56,8 +54,8 @@ define(['knockout', 'text!./lunch-page.html',"knockout-x-editable"], function(ko
 	          pauschaleFruehstueck: 7.0
 	        })
         }).done(function() {
-          //self.closeClick();
-        });*/
+          self.getLunches(self.month());
+        });
     };
     
     function formatDate(d) {
