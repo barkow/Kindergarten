@@ -17,6 +17,7 @@ if (!isset($_SERVER['PHP_AUTH_USER'])) {
       <link href="css/styles.css" rel="stylesheet">
       <link href="bower_modules/select2/select2.css" rel="stylesheet">
       <link href="bower_modules/select2/select2-bootstrap.css" rel="stylesheet">
+      <link href="bower_modules/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
     <!-- endbuild -->
     <!-- build:js -->
       <script src="app/require.config.js"></script>

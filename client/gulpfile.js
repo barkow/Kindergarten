@@ -24,6 +24,8 @@ var requireJsRuntimeConfig = vm.runInNewContext(fs.readFileSync('src/app/require
             'components/contact-details-page/contact-details-page',
             'components/taglist-page/taglist-page',
             'components/login-page/login-page',
+            'components/lunch-page/lunch-page',
+            'components/next-birthdays-element/next-birthdays-element',
             'text!components/about-page/about.html'
         ],
         insertRequire: ['app/startup'],
@@ -46,7 +48,8 @@ gulp.task('js', function () {
 gulp.task('css', function () {
     var bowerCss = gulp.src(['src/bower_modules/components-bootstrap/css/bootstrap.min.css', 
                              'src/bower_modules/select2/select2.css',
-                             'src/bower_modules/select2/select2-bootstrap.css'])
+                             'src/bower_modules/select2/select2-bootstrap.css',
+                             'src/bower_modules/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css'])
             .pipe(replace(/url\((')?\.\.\/fonts\//g, 'url($1fonts/')),
         appCss = gulp.src('src/css/*.css'),
         combinedCss = es.concat(bowerCss, appCss).pipe(concat('css.css')),

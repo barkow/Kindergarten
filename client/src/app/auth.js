@@ -2,8 +2,8 @@ define(["knockout", "jquery", "hasher"], function(ko, $, hasher) {
     function Auth(params) {
         var self = this;
         
-        self.username = ko.observable('axel.barkow');
-        self.password = ko.observable('pass');
+        self.username = ko.observable('');
+        self.password = ko.observable('');
         
         $( document ).ajaxSend(function(event, jqxhr, settings) {
             jqxhr.setRequestHeader('Authorization', "Basic " + btoa(self.username() + ":" + self.password()));

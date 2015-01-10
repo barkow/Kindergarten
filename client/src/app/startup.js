@@ -25,6 +25,8 @@ define(['jquery', 'knockout', './router', './auth','bootstrap', 'knockout-projec
   
   ko.components.register('next-birthdays-element', { require: 'components/next-birthdays-element/next-birthdays-element' });
   
+  ko.components.register('lunch-page', { require: 'components/lunch-page/lunch-page' });
+  
   // [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
 
   // Start the application

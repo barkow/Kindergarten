@@ -693,5 +693,62 @@ $app->get('/schlagwoerter/:id/kinder', function($id) use ($db, $app){
 	echo json_encode($kinder);
 });
 
+//Gibt alle Mittagessen zurück
+$app->get('/mittagessen/monat/:abrechnungsmonat', function($abrechnungsmonat) use ($db, $app){
+	$stmt = $db->prepare('SELECT mittagessen.*, kinder.name, kinder.vorname FROM mittagessen JOIN kinder ON kinder.id = mittagessen.kinderId WHERE mittagessen.abrechnungsmonat=:abrechnungsmonat;');
+	$stmt->bindValue(':abrechnungsmonat', $abrechnungsmonat);
+	$result = $stmt->execute();
+	$mittagessen = array();
+	while($row = $result->fetchArray()){
+		$essen = new stdClass();
+		$essen->name = $row['name'];
+		$essen->vorname = $row['vorname'];
+		$essen->pauschaleFruehstueck = $row['pauschaleFruehstueck'];
+		$essen->anzahlMittagessen = $row['anzahlMittagessen'];
+		$essen->abrechnungsmonat = $row['abrechnungsmonat'];
+		$essen->kostenMittagessen = $row['kostenMittagessen'];
+		$mittagessen[] = $essen;
+	}
+	$app->response->headers->set('Content-Type', 'application/json');
+	echo json_encode($mittagessen);
+});
+
+//Gibt alle Mittagessen zurück
+$app->post('/mittagessen/monat', function() use ($db, $app){
+	$essenData = json_decode($app->request->getBody());
+	if(!property_exists($essenData, 'abrechnungsmonat')){
+		$app->halt(400);
+	}
+	if(!property_exists($essenData, 'pauschaleFruehstueck')){
+		$app->halt(400);
+	}
+	if(!property_exists($essenData, 'kostenMittagessen')){
+		$app->halt(400);
+	}
+	$stmt = $db->prepare('INSERT INTO mittagessen(kinderId, pauschaleFruehstueck, kostenMittagessen, anzahlMittagessen, abrechnungsmonat) SELECT id, :pauschaleFruehstueck, :kostenMittagessen, 0, :abrechnungsmonat FROM kinder;');
+	$stmt->bindValue(':abrechnungsmonat', $essenData->abrechnungsmonat);
+	$stmt->bindValue(':pauschaleFruehstueck', $essenData->pauschaleFruehstueck);
+	$stmt->bindValue(':kostenMittagessen', $essenData->kostenMittagessen);
+	try {
+		$result = $stmt->execute();
+	}
+	catch(Exception $ex){
+		$app->halt(400);
+	}
+	if (!$result){
+		$app->halt(400);
+	}
+	
+	$stmt = $db->prepare('SELECT * FROM mittagessen WHERE abrechnungsmonat=:abrechnungsmonat;');
+	$stmt->bindValue(':abrechnungsmonat', $essenData->abrechnungsmonat);
+	$result = $stmt->execute();
+	$mittagessen = array();
+	while($row = $result->fetchArray()){
+		$mittagessen[] = $row;
+	}
+	$app->response->headers->set('Content-Type', 'application/json');
+	echo json_encode($mittagessen);
+});
+
 $app->run();
 ?>

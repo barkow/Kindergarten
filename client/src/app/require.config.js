@@ -12,11 +12,15 @@ var require = {
         "signals":              "bower_modules/js-signals/dist/signals.min",
         "text":                 "bower_modules/requirejs-text/text",
         "select2":              "bower_modules/select2/select2.min",
+        "x-editable":           "bower_modules/x-editable/dist/bootstrap3-editable/js/bootstrap-editable.min",
+        "knockout-x-editable":  "bower_modules/knockout-x-editable/knockout.x-editable.min",
         "select2-ko-binding":   "app/select2-ko-binding"
     },
     shim: {
         "bootstrap":            { deps: ["jquery"] },
         "jquery-validation":    { deps: ["jquery"] },
-        "select2":              { deps: ["jquery"] }
+        "select2":              { deps: ["jquery"] },
+        "x-editable":           { deps: ["jquery"] },
+        "knockout-x-editable":  { deps: ["x-editable"] }
     }
 };

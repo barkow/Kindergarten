@@ -45,6 +45,17 @@ CREATE table kinderschlagwoerter(
 				kinderId INTEGER REFERENCES kinder(id) ON DELETE CASCADE,
 				schlagwoerterId INTEGER REFERENCES schlagwoerter(id) ON DELETE CASCADE);
 
+DROP table mittagessen;
+CREATE table mittagessen(	
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				kinderId INTEGER REFERENCES kinder(id) ON DELETE CASCADE,
+				pauschaleFruehstueck REAL,
+				kostenMittagessen REAL,
+				anzahlMittagessen INTEGER,
+				abrechnungsmonat TEXT,
+				UNIQUE (kinderId, abrechnungsmonat));
+
+
 INSERT INTO user(username, password) VALUES
 	('axel.barkow', 'pass'),
 	('monika.hoevel', 'ha8Gqn6E2');
