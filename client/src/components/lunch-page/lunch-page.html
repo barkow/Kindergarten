@@ -1,0 +1,17 @@
+<h2>Abrechnung Mittagessen</h2>
+
+<div class="form-group">
+    <label for="inputMonth">Abrechnungsmonat</label>
+    <input type="month" class="form-control"  id="inputMonth" data-bind="value: month">
+</div>
+
+<button type="button" class="btn btn-primary" data-bind="click: newMonthClick, visible: lunches().length == 0">Neuer Abrechnungsmonat</button>
+
+<table class="table table-striped" data-bind="visible: lunches().length > 0">
+    <thead>
+        <tr><th>Name</th><th>Vorname</th><th>Pauschale Frühstück</th><th>Anzahl Mittagessen</th><th>Zu Zahlen</th></tr>
+    </thead>
+    <tbody data-bind="foreach: lunches">
+        <tr><td data-bind="text: surname"></td><td data-bind="text: givenname"></td></td><td data-bind="editable: costBreakfast, editableOptions: {mode: 'inline', type: 'number', min: 0, step: 0.01}"></td><td data-bind="editable: numberOfLunch, editableOptions: {mode: 'inline', type: 'number', min: 0, step: 1}"></td><td data-bind="text: totalCost"></td></tr>
+    </tbody>
+</table>
